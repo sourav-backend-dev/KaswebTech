@@ -1,0 +1,197 @@
+  /*========================== All products page  ===========================*/
+.table-container {
+    max-width: 800px;
+    margin: 20px auto;
+  }
+  
+  .pagination-container {
+    max-width: 400px;
+    margin: 20px auto;
+    text-align: center;
+  }
+  
+  .pagination-container .page-info {
+    padding: 6px 12px;
+    font-size: 16px;
+  }
+  
+  .pagination-container .Polaris-ButtonGroup__Item {
+    border-radius: 0;
+  }
+  
+  .pagination-container .Polaris-ButtonGroup__Item:first-child {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+  }
+  
+  .pagination-container .Polaris-ButtonGroup__Item:last-child {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+  }
+  
+  .pagination-container .Polaris-ButtonGroup__Item:hover {
+    background-color: #f0f0f0;
+  }
+  
+  /*========================== single product page  ===========================*/
+.product-details-container {
+    font-family: 'Roboto', sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .product-details-header {
+    text-align: center;
+  }
+  
+  .product-details-title {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .product-info {
+    margin-top: 30px;
+  }
+  
+  .product-info-item {
+    margin-bottom: 20px;
+  }
+  
+  .product-image {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border-radius: 5px;
+  }
+  
+  .options-section {
+    margin-top: 30px;
+  }
+  
+  .options-title {
+    color: #333;
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .options-list {
+    padding: 0;
+  }
+  
+  .option-item {
+    margin-bottom: 10px;
+  }
+  
+  .virtual-options-section {
+    margin-top: 30px;
+  }
+  
+  .virtual-options-title {
+    color: #333;
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .virtual-options-container {
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    padding: 20px;
+  }
+  
+  .virtual-option-item {
+    margin-bottom: 10px;
+  }
+  
+  .add-variant-button {
+    display: block;
+    width: 100%;
+    max-width: 200px;
+    margin: 30px auto 0;
+    padding: 12px 24px;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: center;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease;
+  }
+  
+  .add-variant-button:hover {
+    background-color: #388e3c;
+  }
+
+  .table-container {
+    width: 100%;
+    overflow-x: auto;
+  }
+  
+  .custom-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .custom-table th, .custom-table td {
+    border: 1px solid #dddddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .custom-table th {
+    background-color: #f2f2f2;
+  }
+  
+  .custom-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .custom-table tr:hover {
+    background-color: #f2f2f2;
+  }
+  
+/*========================== Variant add page  ===========================*/
+  .create-metafield-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+  }
+  
+  .create-metafield-container form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .create-metafield-container form > * {
+    margin-bottom: 20px;
+  }
+  
+  .create-metafield-container .submit-button {
+    align-self: center;
+    padding: 12px 24px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease;
+  }
+  
+  .create-metafield-container .submit-button:hover {
+    background-color: #0056b3;
+  }
+  

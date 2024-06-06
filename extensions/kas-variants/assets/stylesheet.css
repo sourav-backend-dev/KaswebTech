@@ -1,0 +1,30 @@
+/* Style for buttons */
+#KASvariant-container button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+.clicked {
+background-color: #ff9800 !important; 
+}
+/* Style for dropdown */
+#KASvariant-container select {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+#KASvariant-container input[type="text"] {
+    padding: 10px;
+    font-size: 16px;
+    margin: 4px 2px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}

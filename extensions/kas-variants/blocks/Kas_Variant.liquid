@@ -1,0 +1,277 @@
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        console.log("working code !");
+        var metafields = {{product.metafields.Kaswebtech.Variant }};
+        var container = document.getElementById("KASvariant-container");
+        var totalPrice = 0;
+        var previousDropdownValues = {};
+        if (container) {
+            metafields.variants.forEach(function (variant) {
+                var title = variant.title;
+                var selected = variant.selected;
+                var values = Object.keys(variant.values);
+                var prices = [];
+                if (variant.havePrice) {
+                prices = Object.values(variant.values);
+                }
+                console.log("Title:", title);
+                console.log("Selected:", selected);
+                console.log("Values:", values);
+                console.log("Prices:", prices);
+                var buttonTitle = document.createElement("h4");
+                buttonTitle.textContent = title;
+                container.appendChild(buttonTitle);
+                if (selected === "button") {
+                    // Create buttons for each value
+                    values.forEach(function (value, index) {
+                        var button = document.createElement("button");
+                        button.textContent = value.trim();
+                        button.dataset.title = title;
+                        button.title = title;
+                        container.appendChild(button);
+                    });
+                } else if (selected === "dropdown") {
+                    // Create dropdown menu with options for each value
+                    var select = document.createElement("select");
+                    select.dataset.title = title;
+                    select.title = title;
+                    // Add default option
+                    var defaultOption = document.createElement("option");
+                    defaultOption.text = "Select " + title;
+                    defaultOption.disabled = true;
+                    defaultOption.selected = true;
+                    select.add(defaultOption);
+                    // Add other options
+                    values.forEach(function (value) {
+                        var option = document.createElement("option");
+                        option.text = value.trim();
+                        select.add(option);
+                    });
+                    container.appendChild(select);
+                } else if (selected === "TextField") {
+                    var textField = document.createElement("input");
+                    textField.type = "text";
+                    textField.name = "properties[" + title + "]";
+                    textField.placeholder = title;
+                    container.appendChild(textField);
+                }else {
+                    console.error("Invalid 'selected' value:", selected);
+                }
+            });
+        } else {
+            console.error("Container element not found.");
+        }
+
+        // Initialize an object to store selected values for each title
+        var selectedValues = {};
+
+        // Add event listener for clicks on buttons and changes in select elements
+        container.addEventListener("click", function (event) {
+        if (event.target.tagName === "BUTTON") {
+            var title = event.target.dataset.title;
+            var value = event.target.textContent.trim();
+
+            // Check if the value has a price
+            var variant = metafields.variants.find(function (variant) {
+                return variant.title === title && variant.values[value] !== null;
+            });
+
+            if (variant) {
+                toggleInputField(title, value, variant.values[value]); // Toggle input field
+            } else {
+                // If the value doesn't have a price, decrement the total price
+                totalPrice -= variant.values[value];
+                updateTotalPrice();
+            }
+
+            addToSelectedValues(title, value);
+            event.target.classList.toggle("clicked");
+        }
+    });
+
+
+        container.addEventListener("change", function (event) {
+            if (event.target.tagName === "SELECT") {
+                var title = event.target.dataset.title;
+                var value = event.target.value.trim();
+                // Check if the value has a price
+                var variant = metafields.variants.find(function (variant) {
+                    return variant.title === title && variant.values[value] !== null;
+                });
+
+                if (variant) {
+                    updateDropdownPrice(title, value, variant.values[value]);
+                } else {
+                    // If the value doesn't have a price, decrement the total price
+                    totalPrice -= variant.values[value];
+                    updateTotalPrice();
+                }
+                addToSelectedValuesDropDown(title, value);
+                updateInputFieldsForDropdown(title, value);
+            }else if (event.target.tagName === "INPUT") {
+                var title = event.target.name.replace("properties[", "").replace("]", "");
+                var value = event.target.value.trim();
+                addToSelectedValues(title, value);
+                updateInputFieldsForTextField(title, value);
+            }
+        });
+
+        // Function to toggle price text
+        function toggleInputField(title, value, price) {
+            var priceTextId = "total-price";
+            var priceTextNode = document.getElementById(priceTextId);
+
+            if (!priceTextNode) {
+                // If price text node doesn't exist, create and append it
+                priceTextNode = document.createElement("p");
+                priceTextNode.id = priceTextId;
+                priceTextNode.style.color = "red"; // Set text color to red
+                container.appendChild(priceTextNode);
+            }
+
+            var isClicked = selectedValues[title] && selectedValues[title].includes(value);
+
+            if (isClicked) {
+                // If value is already clicked, decrement the total price
+                totalPrice -= price;
+            } else {
+                // If value is not clicked, increment the total price
+                totalPrice += price;
+            }
+            if (price == null){
+                // If price is not available, decrement the total price by the value clicked
+                totalPrice -= variant.values[value];
+            }
+
+            // Update the text content of the price text field with the updated total price
+            priceTextNode.textContent = "Cart Price will Increment By: $" + totalPrice;
+        }
+        function addToSelectedValuesDropDown(title, value) {
+            selectedValues[title] = [value]; // Ensure only the latest value is stored
+            updateInputFields();
+        }
+
+        function addToSelectedValues(title, value) {
+            if (!selectedValues.hasOwnProperty(title)) {
+                selectedValues[title] = [];
+            }
+            // Toggle value in selectedValues array
+            var index = selectedValues[title].indexOf(value);
+            if (index === -1) {
+                selectedValues[title].push(value);
+            } else {
+                selectedValues[title].splice(index, 1);
+            }
+            updateInputFields();
+        }
+
+        function updateInputFieldsForTextField(title, value) {
+            var targetForms = document.querySelectorAll('form[action="/cart/add"]');
+            if (targetForms.length > 0) {
+                targetForms.forEach(function (targetForm) {
+                    var inputName = "properties[" + title + "]";
+                    targetForm.querySelectorAll('input[name="' + inputName + '"]').forEach(function (input) {
+                        input.parentNode.removeChild(input);
+                    });
+                    if (value !== "") {
+                        var newInput = document.createElement("input");
+                        newInput.type = "hidden";
+                        newInput.name = inputName;
+                        newInput.value = value;
+                        targetForm.appendChild(newInput);
+                    }
+                });
+            } else {
+                console.error("Forms with action '/cart/add' not found.");
+            }
+        }
+    // Function to update price for dropdown selection
+    function updateDropdownPrice(title, value, price) {
+        var priceTextId = "total-price";
+        var priceTextNode = document.getElementById(priceTextId);
+
+        if (!priceTextNode) {
+            // If price text node doesn't exist, create and append it
+            priceTextNode = document.createElement("p");
+            priceTextNode.id = priceTextId;
+            priceTextNode.style.color = "red"; // Set text color to red
+            container.appendChild(priceTextNode);
+        }
+
+        // Get the previous selected value and its price
+        var previousValue = previousDropdownValues[title] ? previousDropdownValues[title].value : null;
+        var previousPrice = previousDropdownValues[title] ? previousDropdownValues[title].price : 0;
+
+        // Subtract the previous price
+        totalPrice -= previousPrice;
+
+        // Add the new price
+        totalPrice += price;
+
+        // Update the text content of the price text field with the updated total price
+        priceTextNode.textContent = "Cart Price will Increment By: $" + totalPrice;
+
+        // Store the current value and its price as the previous value
+        previousDropdownValues[title] = { value: value, price: price };
+    }
+
+        function updateInputFieldsForDropdown(title, value) {
+            var targetForms = document.querySelectorAll('form[action="/cart/add"]');
+            if (targetForms.length > 0) {
+                targetForms.forEach(function (targetForm) {
+                    // Clear existing input fields for this title
+                    var inputName = "properties[" + title + "]";
+                    targetForm.querySelectorAll('input[name="' + inputName + '"]').forEach(function (input) {
+                        input.parentNode.removeChild(input);
+                    });
+                    // Add new input field for the latest selected value
+                    if (value !== "") {
+                        var newInput = document.createElement("input");
+                        newInput.type = "hidden";
+                        newInput.name = inputName;
+                        newInput.value = value;
+                        targetForm.appendChild(newInput);
+                    }
+                });
+            } else {
+                console.error("Forms with action '/cart/add' not found.");
+            }
+        }
+
+        function updateInputFields() {
+            var targetForms = document.querySelectorAll('form[action="/cart/add"]');
+            if (targetForms.length > 0) {
+                targetForms.forEach(function (targetForm) {
+                    // Clear all existing input fields
+                    targetForm.querySelectorAll('input[name^="properties["]').forEach(function (input) {
+                        input.parentNode.removeChild(input);
+                    });
+                    // Add new input fields for each title and selected values
+                    Object.keys(selectedValues).forEach(function (title) {
+                        var value = selectedValues[title].join(",");
+                        var newInput = document.createElement("input");
+                        newInput.type = "hidden";
+                        newInput.name = "properties[" + title + "]";
+                        newInput.value = value;
+                        targetForm.appendChild(newInput);
+                    });
+                });
+            } else {
+                console.error("Forms with action '/cart/add' not found.");
+            }
+        }
+    });
+</script>
+<div id="KASvariant-container"></div>
+
+{% schema %}
+  {
+    "name": "Star Rating",
+    "target": "section",
+    "stylesheet": "stylesheet.css",
+    "enabled_on": {
+      "templates": ["product"]
+    },
+    "settings": []
+  }
+{% endschema %}
