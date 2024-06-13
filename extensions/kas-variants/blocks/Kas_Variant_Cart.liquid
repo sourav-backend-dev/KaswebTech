@@ -1,0 +1,62 @@
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        function handleClick(event) {
+            event.preventDefault();
+            fetch('/cart.js', {
+                method: 'GET',
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(cart => {
+                console.log('Cart:', cart);
+
+                // Send cart data to your app's proxy endpoint
+                return fetch("/apps/kas-variants-1/", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(cart)
+                });
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error sending data to backend');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const invoiceUrl = data.invoiceUrl; // Assuming this matches the response structure from proxy.jsx
+                window.location.href = invoiceUrl; // Redirect to the invoice URL
+            })
+            .catch(error => {
+                console.error('Error sending data to backend:', error);
+                // Handle errors, e.g., show a message to the user
+            });
+        }
+
+        // Add event listener to your custom checkout button
+        var checkoutButton = document.getElementById("checkout");
+        if (checkoutButton) {
+            checkoutButton.addEventListener("click", handleClick);
+        }
+    });
+</script>
+{% schema %}
+{
+    "name": "Kas-Variants",
+    "target": "head",
+    "enabled_on": {
+        "templates": ["*"]
+    },
+    "settings": []
+}
+{% endschema %}

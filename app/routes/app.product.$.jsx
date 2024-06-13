@@ -148,7 +148,7 @@ export default function ProductPage() {
               <td>{index + 1}</td>
               <td>{variant.title}</td>
               <td>{variant.selected}</td>
-              <td colSpan={variant.selected === "TextField" ? 2 : 1}>
+              <td >
                 {variant.selected !== "TextField" && variant.values ? (
                   <ul>
                     {Object.entries(variant.values).map(([value, price]) => (
@@ -157,7 +157,7 @@ export default function ProductPage() {
                       </li>
                     ))}
                   </ul>
-                ) : null}
+                ) : <ul><li>N/A</li></ul>}
               </td>
               <td>
                 <Button onClick={() => handleDelete(variant.id)}>Delete</Button>
