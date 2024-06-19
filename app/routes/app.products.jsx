@@ -2,6 +2,7 @@ import {
   Button,
   IndexTable,
   ButtonGroup,
+  TextField
 } from "@shopify/polaris";
 import { useLoaderData } from "@remix-run/react";
 import { useState } from "react";
@@ -15,20 +16,30 @@ export default function ProductsPage() {
   const { data } = useLoaderData();
   const navigate = useNavigate();
   const itemsPerPage = 10;
-
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
 
-  const currentItems = data.slice(startIndex, endIndex);
+ // Filter data based on search term
+ const filteredData = data.filter((item) =>
+  item.title.toLowerCase().includes(searchTerm.toLowerCase())
+);
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+const currentItems = filteredData.slice(startIndex, endIndex);
+
+const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
   const handleViewClick = (id) => {
     navigate(`/app/product/${id}`);
+  };
+
+  const handleSearchChange = (value) => {
+    setSearchTerm(value);
+    setCurrentPage(1); 
   };
 
   const rowMarkup = currentItems.map(({ image, id, title }, index) => (
@@ -52,9 +63,17 @@ export default function ProductsPage() {
   ));
   return (
     <>
+        <div className="search-container">
+          <TextField
+            value={searchTerm}
+            onChange={handleSearchChange}
+            placeholder="Search by product title"
+            autoComplete="off"
+          />
+        </div>
       <div className="table-container">
         <IndexTable
-          itemCount={data.length}
+          itemCount={filteredData.length}
           headings={[
             { title: "Image" },
             { title: "Id" },
