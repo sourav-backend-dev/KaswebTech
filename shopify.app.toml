@@ -3,7 +3,7 @@
 client_id = "6998c3de15fc155881982786036e3dd5"
 name = "kasweb-tech"
 handle = "kasweb-tech"
-application_url = "https://surge-cursor-receivers-choice.trycloudflare.com"
+application_url = "https://header-scientist-donated-spatial.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,16 +17,16 @@ scopes = "read_product_listings,unauthenticated_read_product_listings,write_cart
 
 [auth]
 redirect_urls = [
-  "https://surge-cursor-receivers-choice.trycloudflare.com/auth/callback",
-  "https://surge-cursor-receivers-choice.trycloudflare.com/auth/shopify/callback",
-  "https://surge-cursor-receivers-choice.trycloudflare.com/api/auth/callback"
+  "https://header-scientist-donated-spatial.trycloudflare.com/auth/callback",
+  "https://header-scientist-donated-spatial.trycloudflare.com/auth/shopify/callback",
+  "https://header-scientist-donated-spatial.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
 api_version = "2024-04"
 
 [app_proxy]
-url = "https://surge-cursor-receivers-choice.trycloudflare.com/app/proxy"
+url = "https://header-scientist-donated-spatial.trycloudflare.com/app/proxy"
 subpath = "kas-variants-1"
 prefix = "apps"
 
