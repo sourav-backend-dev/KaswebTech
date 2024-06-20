@@ -114,7 +114,7 @@ export default function Add_variantPage() {
     { label: "Buttons", value: "button" },
     { label: "TextField", value: "TextField" },
     { label: "Color Swatches", value: "colorSwatches" },
-    { label: "Check Box", value: "CheckBox" },
+    { label: "Check Boxes", value: "CheckBox" },
   ];
 
   const handleAddField = () => {

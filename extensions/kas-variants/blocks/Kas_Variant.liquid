@@ -25,7 +25,7 @@
       <div class="checkbox-group" data-title="{{ variant.title }}">
         {% for value in variant.values %}
           <label>
-            <input type="checkbox" data-title="{{ variant.title }}" value="{{ value[0] }}"> {{ value[0] }}
+            <input type="checkbox" data-title="{{ variant.title }}" data-value="{{ value[0] }}"> {{ value[0] }}
           </label>
         {% endfor %}
       </div>
@@ -45,27 +45,22 @@
       if (event.target.tagName === "BUTTON") {
         var title = event.target.dataset.title;
         var value = event.target.textContent.trim();
-
         var variant = metafields.variants.find(function (variant) {
           return variant.title === title && variant.values[value] !== null;
         });
-
         if (variant) {
           toggleInputField(title, value, variant.values[value]);
         } else {
           console.error("Variant not found for title:", title, "and value:", value);
         }
-
         addToSelectedValues(title, value);
         event.target.classList.toggle("clicked");
       } else if (event.target.classList.contains("color-swatch")) {
         var title = event.target.dataset.title;
         var value = event.target.dataset.value.trim();
-
         var variant = metafields.variants.find(function (variant) {
           return variant.title === title && variant.values[value] !== null;
         });
-
         if (variant) {
           addToSelectedValues(title, value);
           event.target.classList.toggle("selected");
@@ -79,11 +74,9 @@
       if (event.target.tagName === "SELECT") {
         var title = event.target.dataset.title;
         var value = event.target.value.trim();
-
         var variant = metafields.variants.find(function (variant) {
           return variant.title === title && variant.values[value] !== null;
         });
-
         if (variant) {
           updateDropdownPrice(title, value, variant.values[value]);
         } else {
@@ -91,7 +84,15 @@
         }
         addToSelectedValuesDropDown(title, value);
         updateInputFieldsForDropdown(title, value);
-      } else if (event.target.tagName === "INPUT") {
+      } else if (event.target.tagName === "INPUT" && event.target.type === "checkbox") {
+        var title = event.target.dataset.title;
+        var value = event.target.dataset.value;
+        if (event.target.checked) {
+          addToSelectedValues(title, value);
+        } else {
+          removeFromSelectedValues(title, value);
+        }
+      } else if (event.target.tagName === "INPUT" && event.target.type === "text") {
         var title = event.target.name.replace("properties[", "").replace("]", "");
         var value = event.target.value.trim();
         addToSelectedValues(title, value);
@@ -102,22 +103,18 @@
     function toggleInputField(title, value, price) {
       var priceTextId = "total-price";
       var priceTextNode = document.getElementById(priceTextId);
-
       if (!priceTextNode) {
         priceTextNode = document.createElement("p");
         priceTextNode.id = priceTextId;
         priceTextNode.style.color = "red";
         container.appendChild(priceTextNode);
       }
-
       var isClicked = selectedValues[title] && selectedValues[title].includes(value);
-
       if (isClicked) {
         totalPrice -= price;
       } else {
         totalPrice += price;
       }
-
       priceTextNode.textContent = "Cart Price will Increment By: $" + totalPrice;
       updateInputFields();
     }
@@ -138,6 +135,16 @@
         selectedValues[title].splice(index, 1);
       }
       updateInputFields();
+    }
+
+    function removeFromSelectedValues(title, value) {
+      if (selectedValues.hasOwnProperty(title)) {
+        var index = selectedValues[title].indexOf(value);
+        if (index !== -1) {
+          selectedValues[title].splice(index, 1);
+          updateInputFields();
+        }
+      }
     }
 
     function updateInputFieldsForTextField(title, value) {
@@ -164,22 +171,17 @@
     function updateDropdownPrice(title, value, price) {
       var priceTextId = "total-price";
       var priceTextNode = document.getElementById(priceTextId);
-
       if (!priceTextNode) {
         priceTextNode = document.createElement("p");
         priceTextNode.id = priceTextId;
         priceTextNode.style.color = "red";
         container.appendChild(priceTextNode);
       }
-
       var previousValue = previousDropdownValues[title] ? previousDropdownValues[title].value : null;
       var previousPrice = previousDropdownValues[title] ? previousDropdownValues[title].price : 0;
-
       totalPrice -= previousPrice;
       totalPrice += price;
-
       priceTextNode.textContent = "Cart Price will Increment By: $" + totalPrice;
-
       previousDropdownValues[title] = { value: value, price: price };
       updateInputFields();
     }
