@@ -2,12 +2,11 @@ import {
   Text,
 } from "@shopify/polaris";
 import React from 'react';
-
+// import { authenticate } from "../shopify.server";
+import { useLoaderData } from "@remix-run/react";
 // ==========================example of action and loader function======================
 // export const loader = async ({ request }) => {
-//   await authenticate.admin(request);
-
-//   return null;
+  
 // };
 
 // export const action = async ({ request }) => {
@@ -16,6 +15,8 @@ import React from 'react';
 // };
 
 export default function Index() {
+  const data = useLoaderData();
+  console.log(data);
   // const { shopOrigin, host } = this.props;
   // const config = { apiKey: API_KEY, shopOrigin, host, forceRedirect: true };
   

@@ -3,7 +3,7 @@
 client_id = "6998c3de15fc155881982786036e3dd5"
 name = "kasweb-tech"
 handle = "kasweb-tech"
-application_url = "https://header-scientist-donated-spatial.trycloudflare.com"
+application_url = "https://happy-ham-vacuum-segment.trycloudflare.com"
 embedded = true
 
 [build]
@@ -13,20 +13,20 @@ include_config_on_deploy = true
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_product_listings,unauthenticated_read_product_listings,write_cart_transforms,write_content,write_draft_orders,write_inventory,write_products,write_purchase_options"
+scopes = "read_product_listings,unauthenticated_read_product_listings,write_cart_transforms,write_content,write_draft_orders,write_files,write_inventory,write_products,write_purchase_options,write_themes"
 
 [auth]
 redirect_urls = [
-  "https://header-scientist-donated-spatial.trycloudflare.com/auth/callback",
-  "https://header-scientist-donated-spatial.trycloudflare.com/auth/shopify/callback",
-  "https://header-scientist-donated-spatial.trycloudflare.com/api/auth/callback"
+  "https://happy-ham-vacuum-segment.trycloudflare.com/auth/callback",
+  "https://happy-ham-vacuum-segment.trycloudflare.com/auth/shopify/callback",
+  "https://happy-ham-vacuum-segment.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
 api_version = "2024-04"
 
 [app_proxy]
-url = "https://header-scientist-donated-spatial.trycloudflare.com/app/proxy"
+url = "https://happy-ham-vacuum-segment.trycloudflare.com/app/proxy"
 subpath = "kas-variants-1"
 prefix = "apps"
 
