@@ -1,77 +1,76 @@
-import {
-    unstable_composeUploadHandlers,
-    unstable_createMemoryUploadHandler,
-    unstable_parseMultipartFormData,
-    unstable_createFileUploadHandler,
-} from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
-import { authenticate } from "../shopify.server";
-
-export const standardFileUploadHandler = unstable_createFileUploadHandler({
-    directory: "app/Img",
-});
-export const fileUploadHandler = (args) => {
-    return standardFileUploadHandler(args);
-};
-
-export async function action({ request }) {
-    const uploadHandler = unstable_composeUploadHandlers(
-        async ({ name, contentType, data, filename }) => {
-            const uploadedImage = await fileUploadHandler({
-                name,
-                data,
-                filename,
-                contentType,
-            });
-            return uploadedImage;
-        },
-        unstable_createMemoryUploadHandler()
-    );
-    const formData = await unstable_parseMultipartFormData(
-        request,
-        uploadHandler
-    );
-
-    const fields = {};
-    for (const [name, value] of formData.entries()) {
-        fields[name] = value;
-    }
-
-    const fileName = fields.file?.name;
-
-    const { admin } = await authenticate.admin(request);
-   
-    const response = await admin.graphql(
-    `#graphql
-    mutation fileCreate($files: [FileCreateInput!]!) {
-        fileCreate(files: $files) {
-        files {
-            id
-        }
-        }
-    }`,
-    {
-        variables: {
-        "files": {
-            "alt": "fallback text for an image",
-            "contentType": "IMAGE",
-            "originalSource": `${process.env.SHOPIFY_APP_URL}/app/Img/${fileName}`
-        }
-        },
-    },
-    );
-    const data = await response.json();
-    return data.data.fileCreate.files[0].id;
-}
+import { DropZone, BlockStack, Thumbnail, Text } from '@shopify/polaris';
+import { UploadIcon } from '@shopify/polaris-icons';
+import { useState, useCallback } from 'react';
 
 export default function UploadPage() {
     const actionData = useActionData();
-    console.log(actionData);
+    const [files, setFiles] = useState([]);
+
+    const handleDropZoneDrop = useCallback(
+        (_dropFiles, acceptedFiles, _rejectedFiles) =>
+            setFiles((files) => [...files, ...acceptedFiles]),
+        []
+    );
+
+    const validImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
+    const fileUpload = !files.length && <DropZone.FileUpload />;
+    const uploadedFiles = files.length > 0 && (
+        <div style={{ padding: '0' }}>
+            <BlockStack vertical>
+                {files.map((file, index) => (
+                    <BlockStack alignment="center" key={index}>
+                        <Thumbnail
+                            size="small"
+                            alt={file.name}
+                            source={
+                                validImageTypes.includes(file.type)
+                                    ? window.URL.createObjectURL(file)
+                                    : UploadIcon
+                            }
+                        />
+                        <div>
+                            {file.name}{' '}
+                            <Text variant="bodySm" as="p">
+                                {file.size} bytes
+                            </Text>
+                        </div>
+                    </BlockStack>
+                ))}
+            </BlockStack>
+        </div>
+    );
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        const formData = new FormData();
+        files.forEach((file, index) => {
+            formData.append('file', file, file.name);
+        });
+
+        fetch('/app/uploadAction', {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Upload successful:', data);
+        })
+        .catch(error => {
+            console.error('Upload error:', error);
+        });
+    };
+
     return (
         <div>
+            <div style={{width: 40, height: 40}}>
+                <DropZone onDrop={handleDropZoneDrop}>
+                    {uploadedFiles}
+                    {fileUpload}
+                </DropZone>
+            </div>
             <h1>Upload a File</h1>
-            <Form method="post" encType="multipart/form-data">
-                <input type="file" name="file" />
+            <Form onSubmit={handleSubmit}>
                 <button type="submit">Upload</button>
             </Form>
 
