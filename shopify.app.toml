@@ -3,7 +3,7 @@
 client_id = "6998c3de15fc155881982786036e3dd5"
 name = "kasweb-tech"
 handle = "kasweb-tech"
-application_url = "https://happy-ham-vacuum-segment.trycloudflare.com"
+application_url = "https://bookings-achieving-first-exhibition.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,16 +17,16 @@ scopes = "read_product_listings,unauthenticated_read_product_listings,write_cart
 
 [auth]
 redirect_urls = [
-  "https://happy-ham-vacuum-segment.trycloudflare.com/auth/callback",
-  "https://happy-ham-vacuum-segment.trycloudflare.com/auth/shopify/callback",
-  "https://happy-ham-vacuum-segment.trycloudflare.com/api/auth/callback"
+  "https://bookings-achieving-first-exhibition.trycloudflare.com/auth/callback",
+  "https://bookings-achieving-first-exhibition.trycloudflare.com/auth/shopify/callback",
+  "https://bookings-achieving-first-exhibition.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
 api_version = "2024-04"
 
 [app_proxy]
-url = "https://happy-ham-vacuum-segment.trycloudflare.com/app/proxy"
+url = "https://bookings-achieving-first-exhibition.trycloudflare.com/app/proxy"
 subpath = "kas-variants-1"
 prefix = "apps"
 
