@@ -149,7 +149,7 @@ export default function ProductPage() {
               <td>{variant.title}</td>
               <td>{variant.selected}</td>
               <td >
-                {variant.selected !== "TextField" && variant.values ? (
+                {variant.selected !== "TextField" && variant.values && variant.selected !== "colorSwatches"? (
                   <ul>
                     {Object.entries(variant.values).map(([value, price]) => (
                       <li key={value}>
@@ -157,6 +157,37 @@ export default function ProductPage() {
                       </li>
                     ))}
                   </ul>
+                ) : variant.selected == "colorSwatches" && variant.values ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {Object.entries(variant.values).map(([colorName, hexValue]) => (
+                      <div
+                        key={colorName} // Add a unique key for each color swatch
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          marginRight: "10px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: "36px",
+                            height: "36px",
+                            backgroundColor: hexValue,
+                            border: "1px solid #222",
+                            borderRadius: "50%",
+                            marginBottom: "5px",
+                          }}
+                        ></div>
+                        <span style={{ fontSize: "12px", color: "#555" }}>{colorName}</span>
+                      </div>
+                    ))}
+                  </div>
                 ) : <ul><li>N/A</li></ul>}
               </td>
               <td>

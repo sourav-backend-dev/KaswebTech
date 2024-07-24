@@ -1,7 +1,11 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        
+        // Function to handle the click event on the custom checkout button
         function handleClick(event) {
             event.preventDefault();
+
+            // Fetch cart data from the server
             fetch('/cart.js', {
                 method: 'GET',
                 cache: 'no-cache',
@@ -34,8 +38,9 @@
                 return response.json();
             })
             .then(data => {
+                // Redirect to the invoice URL
                 const invoiceUrl = data.invoiceUrl; // Assuming this matches the response structure from proxy.jsx
-                window.location.href = invoiceUrl; // Redirect to the invoice URL
+                window.location.href = invoiceUrl;
             })
             .catch(error => {
                 console.error('Error sending data to backend:', error);
@@ -43,19 +48,41 @@
             });
         }
 
-        // Add event listener to your custom checkout button
-        var checkoutButton = document.getElementById("checkout");
+        // Add event listener to the custom checkout button
+        const checkoutButton = document.getElementById("checkout");
         if (checkoutButton) {
             checkoutButton.addEventListener("click", handleClick);
         }
+
+        // // Function to hide the price from the cart page
+        // function hidePriceFromCart() {
+        //     // Find all elements with class 'product-option'
+        //     const productOptions = document.querySelectorAll('.product-option');
+
+        //     // Iterate through each product option
+        //     productOptions.forEach(option => {
+        //         // Find the <dt> element (which contains the label)
+        //         const dtElement = option.querySelector('dt');
+
+        //         // Check if it contains the text 'price:'
+        //         if (dtElement && dtElement.textContent.trim().toLowerCase() === 'price:') {
+        //             // If it matches, remove the entire parent <div> element
+        //             option.parentNode.removeChild(option);
+        //         }
+        //     });
+        // }
+
+        // // Execute the function to hide the price from the cart page
+        // hidePriceFromCart();
     });
 </script>
+
 {% schema %}
 {
     "name": "Kas-Variants",
     "target": "head",
     "enabled_on": {
-        "templates": ["*"]
+        "templates": ["cart"]
     },
     "settings": []
 }

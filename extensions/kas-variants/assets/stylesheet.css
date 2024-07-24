@@ -29,6 +29,22 @@ background-color: #ff9800 !important;
     border-radius: 4px;
 }
 
+.color-swatches {
+display: flex;
+gap: 10px;
+}
+  
+.color-swatch {
+width: 30px;
+height: 30px;
+border-radius: 50%;
+cursor: pointer;
+border: 2px solid transparent;
+}
 
+.color-swatch.selected {
+box-shadow: 5px 5px 15px #2f302b;
+}
+  
 
 /* cart page custom styling  */
