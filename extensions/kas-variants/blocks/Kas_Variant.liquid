@@ -1,256 +1,247 @@
+<div id="KASvariant-container">
+  {% assign metafield_data = product.metafields.Kaswebtech.Variant.value | parse_json %}
+  {% for variant in metafield_data.variants %}
+    <h4>{{ variant.title }}</h4>
+    {% if variant.selected == "button" %}
+      {% for value in variant.values %}
+        <button data-title="{{ variant.title }}" title="{{ variant.title }}">{{ value[0] }}</button>
+      {% endfor %}
+    {% elsif variant.selected == "dropdown" %}
+      <select data-title="{{ variant.title }}" title="{{ variant.title }}">
+        <option disabled selected>Select {{ variant.title }}</option>
+        {% for value in variant.values %}
+          <option>{{ value[0] }}</option>
+        {% endfor %}
+      </select>
+    {% elsif variant.selected == "TextField" %}
+      <input type="text" name="properties[{{ variant.title }}]" placeholder="{{ variant.title }}">
+    {% elsif variant.selected == "colorSwatches" %}
+      <div class="color-swatches" data-title="{{ variant.title }}">
+        {% for value in variant.values %}
+          <div class="color-swatch" data-title="{{ variant.title }}" data-value="{{ value[0] }}" style="background-color: {{ value[1] }}; display:inline-block;"></div>
+        {% endfor %}
+      </div>
+    {% elsif variant.selected == "CheckBox" %}
+      <div class="checkbox-group" data-title="{{ variant.title }}">
+        {% for value in variant.values %}
+          <label>
+            <input type="checkbox" data-title="{{ variant.title }}" data-value="{{ value[0] }}"> {{ value[0] }}
+          </label>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endfor %}
+</div>
+
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var metafields = {{product.metafields.Kaswebtech.Variant }};
-        var container = document.getElementById("KASvariant-container");
-        var totalPrice = 0;
-        var previousDropdownValues = {};
-        if (container) {
-            metafields.variants.forEach(function (variant) {
-                var title = variant.title;
-                var selected = variant.selected;
-                var values = Object.keys(variant.values);
-                var prices = [];
-                if (variant.havePrice) {
-                    prices = Object.values(variant.values);
-                }
-                console.log("Title:", title);
-                console.log("Selected:", selected);
-                console.log("Values:", values);
-                console.log("Prices:", prices);
-                var buttonTitle = document.createElement("h4");
-                buttonTitle.textContent = title;
-                container.appendChild(buttonTitle);
-                if (selected === "button") {
-                    values.forEach(function (value, index) {
-                        var button = document.createElement("button");
-                        button.textContent = value.trim();
-                        button.dataset.title = title;
-                        button.title = title;
-                        container.appendChild(button);
-                    });
-                } else if (selected === "dropdown") {
-                    var select = document.createElement("select");
-                    select.dataset.title = title;
-                    select.title = title;
-                    var defaultOption = document.createElement("option");
-                    defaultOption.text = "Select " + title;
-                    defaultOption.disabled = true;
-                    defaultOption.selected = true;
-                    select.add(defaultOption);
-                    values.forEach(function (value) {
-                        var option = document.createElement("option");
-                        option.text = value.trim();
-                        select.add(option);
-                    });
-                    container.appendChild(select);
-                } else if (selected === "TextField") {
-                    var textField = document.createElement("input");
-                    textField.type = "text";
-                    textField.name = "properties[" + title + "]";
-                    textField.placeholder = title;
-                    container.appendChild(textField);
-                } else {
-                    console.error("Invalid 'selected' value:", selected);
-                }
-            });
+  document.addEventListener("DOMContentLoaded", function () {
+    var metafields = {{ product.metafields.Kaswebtech.Variant }};
+    var container = document.getElementById("KASvariant-container");
+    var totalPrice = 0;
+    var previousDropdownValues = {};
+    var selectedValues = {};
+
+    container.addEventListener("click", function (event) {
+      if (event.target.tagName === "BUTTON") {
+        var title = event.target.dataset.title;
+        var value = event.target.textContent.trim();
+        var variant = metafields.variants.find(function (variant) {
+          return variant.title === title && variant.values[value] !== null;
+        });
+        if (variant) {
+          toggleInputField(title, value, variant.values[value]);
         } else {
-            console.error("Container element not found.");
+          console.error("Variant not found for title:", title, "and value:", value);
         }
-
-        var selectedValues = {};
-
-        container.addEventListener("click", function (event) {
-            if (event.target.tagName === "BUTTON") {
-                var title = event.target.dataset.title;
-                var value = event.target.textContent.trim();
-
-                var variant = metafields.variants.find(function (variant) {
-                    return variant.title === title && variant.values[value] !== null;
-                });
-
-                if (variant) {
-                    toggleInputField(title, value, variant.values[value]);
-                } else {
-                    totalPrice -= variant.values[value];
-                    updateTotalPrice();
-                }
-
-                addToSelectedValues(title, value);
-                event.target.classList.toggle("clicked");
-            }
+        addToSelectedValues(title, value);
+        event.target.classList.toggle("clicked");
+      } else if (event.target.classList.contains("color-swatch")) {
+        var title = event.target.dataset.title;
+        var value = event.target.dataset.value.trim();
+        var variant = metafields.variants.find(function (variant) {
+          return variant.title === title && variant.values[value] !== null;
         });
-
-        container.addEventListener("change", function (event) {
-            if (event.target.tagName === "SELECT") {
-                var title = event.target.dataset.title;
-                var value = event.target.value.trim();
-
-                var variant = metafields.variants.find(function (variant) {
-                    return variant.title === title && variant.values[value] !== null;
-                });
-
-                if (variant) {
-                    updateDropdownPrice(title, value, variant.values[value]);
-                } else {
-                    totalPrice -= variant.values[value];
-                    updateTotalPrice();
-                }
-                addToSelectedValuesDropDown(title, value);
-                updateInputFieldsForDropdown(title, value);
-            } else if (event.target.tagName === "INPUT") {
-                var title = event.target.name.replace("properties[", "").replace("]", "");
-                var value = event.target.value.trim();
-                addToSelectedValues(title, value);
-                updateInputFieldsForTextField(title, value);
-            }
-        });
-
-        function toggleInputField(title, value, price) {
-            var priceTextId = "total-price";
-            var priceTextNode = document.getElementById(priceTextId);
-
-            if (!priceTextNode) {
-                priceTextNode = document.createElement("p");
-                priceTextNode.id = priceTextId;
-                priceTextNode.style.color = "red";
-                container.appendChild(priceTextNode);
-            }
-
-            var isClicked = selectedValues[title] && selectedValues[title].includes(value);
-
-            if (isClicked) {
-                totalPrice -= price;
-            } else {
-                totalPrice += price;
-            }
-            if (price == null){
-                totalPrice -= variant.values[value];
-            }
-
-            priceTextNode.textContent = "Cart Price will Increment By: $" + totalPrice;
-            updateInputFields(); // Ensure input fields are updated with the new total price
+        if (variant) {
+          addToSelectedValues(title, value);
+          event.target.classList.toggle("selected");
+        } else {
+          console.error("Variant not found for title:", title, "and value:", value);
         }
-
-        function addToSelectedValuesDropDown(title, value) {
-            selectedValues[title] = [value];
-            updateInputFields();
-        }
-
-        function addToSelectedValues(title, value) {
-            if (!selectedValues.hasOwnProperty(title)) {
-                selectedValues[title] = [];
-            }
-            var index = selectedValues[title].indexOf(value);
-            if (index === -1) {
-                selectedValues[title].push(value);
-            } else {
-                selectedValues[title].splice(index, 1);
-            }
-            updateInputFields();
-        }
-
-        function updateInputFieldsForTextField(title, value) {
-            var targetForms = document.querySelectorAll('form[action="/cart/add"]');
-            if (targetForms.length > 0) {
-                targetForms.forEach(function (targetForm) {
-                    var inputName = "properties[" + title + "]";
-                    targetForm.querySelectorAll('input[name="' + inputName + '"]').forEach(function (input) {
-                        input.parentNode.removeChild(input);
-                    });
-                    if (value !== "") {
-                        var newInput = document.createElement("input");
-                        newInput.type = "hidden";
-                        newInput.name = inputName;
-                        newInput.value = value;
-                        targetForm.appendChild(newInput);
-                    }
-                });
-            } else {
-                console.error("Forms with action '/cart/add' not found.");
-            }
-        }
-
-        function updateDropdownPrice(title, value, price) {
-            var priceTextId = "total-price";
-            var priceTextNode = document.getElementById(priceTextId);
-
-            if (!priceTextNode) {
-                priceTextNode = document.createElement("p");
-                priceTextNode.id = priceTextId;
-                priceTextNode.style.color = "red";
-                container.appendChild(priceTextNode);
-            }
-
-            var previousValue = previousDropdownValues[title] ? previousDropdownValues[title].value : null;
-            var previousPrice = previousDropdownValues[title] ? previousDropdownValues[title].price : 0;
-
-            totalPrice -= previousPrice;
-            totalPrice += price;
-
-            priceTextNode.textContent = "Cart Price will Increment By: $" + totalPrice;
-
-            previousDropdownValues[title] = { value: value, price: price };
-            updateInputFields(); // Ensure input fields are updated with the new total price
-        }
-
-        function updateInputFieldsForDropdown(title, value) {
-            var targetForms = document.querySelectorAll('form[action="/cart/add"]');
-            if (targetForms.length > 0) {
-                targetForms.forEach(function (targetForm) {
-                    var inputName = "properties[" + title + "]";
-                    targetForm.querySelectorAll('input[name="' + inputName + '"]').forEach(function (input) {
-                        input.parentNode.removeChild(input);
-                    });
-                    if (value !== "") {
-                        var newInput = document.createElement("input");
-                        newInput.type = "hidden";
-                        newInput.name = inputName;
-                        newInput.value = value;
-                        targetForm.appendChild(newInput);
-                    }
-                });
-            } else {
-                console.error("Forms with action '/cart/add' not found.");
-            }
-        }
-
-        function updateInputFields() {
-            var targetForms = document.querySelectorAll('form[action="/cart/add"]');
-            if (targetForms.length > 0) {
-                targetForms.forEach(function (targetForm) {
-                    targetForm.querySelectorAll('input[name^="properties["]').forEach(function (input) {
-                        input.parentNode.removeChild(input);
-                    });
-                    Object.keys(selectedValues).forEach(function (title) {
-                        var value = selectedValues[title].join(",");
-                        var newInput = document.createElement("input");
-                        newInput.type = "hidden";
-                        newInput.name = "properties[" + title + "]";
-                        newInput.value = value;
-                        targetForm.appendChild(newInput);
-                    });
-                    var totalPriceInput = document.createElement("input");
-                    totalPriceInput.type = "hidden";
-                    totalPriceInput.name = "properties[price]";
-                    totalPriceInput.value = totalPrice;
-                    targetForm.appendChild(totalPriceInput);
-                });
-            } else {
-                console.error("Forms with action '/cart/add' not found.");
-            }
-        }
+      }
     });
-</script>
-<div id="KASvariant-container"></div>
 
+    container.addEventListener("change", function (event) {
+      if (event.target.tagName === "SELECT") {
+        var title = event.target.dataset.title;
+        var value = event.target.value.trim();
+        var variant = metafields.variants.find(function (variant) {
+          return variant.title === title && variant.values[value] !== null;
+        });
+        if (variant) {
+          updateDropdownPrice(title, value, variant.values[value]);
+        } else {
+          console.error("Variant not found for title:", title, "and value:", value);
+        }
+        addToSelectedValuesDropDown(title, value);
+        updateInputFieldsForDropdown(title, value);
+      } else if (event.target.tagName === "INPUT" && event.target.type === "checkbox") {
+        var title = event.target.dataset.title;
+        var value = event.target.dataset.value;
+        if (event.target.checked) {
+          addToSelectedValues(title, value);
+        } else {
+          removeFromSelectedValues(title, value);
+        }
+      } else if (event.target.tagName === "INPUT" && event.target.type === "text") {
+        var title = event.target.name.replace("properties[", "").replace("]", "");
+        var value = event.target.value.trim();
+        addToSelectedValues(title, value);
+        updateInputFieldsForTextField(title, value);
+      }
+    });
+
+    function toggleInputField(title, value, price) {
+      var priceTextId = "total-price";
+      var priceTextNode = document.getElementById(priceTextId);
+      if (!priceTextNode) {
+        priceTextNode = document.createElement("p");
+        priceTextNode.id = priceTextId;
+        priceTextNode.style.color = "red";
+        container.appendChild(priceTextNode);
+      }
+      var isClicked = selectedValues[title] && selectedValues[title].includes(value);
+      if (isClicked) {
+        totalPrice -= price;
+      } else {
+        totalPrice += price;
+      }
+      priceTextNode.textContent = "Cart Price will Increment By: $" + totalPrice;
+      updateInputFields();
+    }
+
+    function addToSelectedValuesDropDown(title, value) {
+      selectedValues[title] = [value];
+      updateInputFields();
+    }
+
+    function addToSelectedValues(title, value) {
+      if (!selectedValues.hasOwnProperty(title)) {
+        selectedValues[title] = [];
+      }
+      var index = selectedValues[title].indexOf(value);
+      if (index === -1) {
+        selectedValues[title].push(value);
+      } else {
+        selectedValues[title].splice(index, 1);
+      }
+      updateInputFields();
+    }
+
+    function removeFromSelectedValues(title, value) {
+      if (selectedValues.hasOwnProperty(title)) {
+        var index = selectedValues[title].indexOf(value);
+        if (index !== -1) {
+          selectedValues[title].splice(index, 1);
+          updateInputFields();
+        }
+      }
+    }
+
+    function updateInputFieldsForTextField(title, value) {
+      var targetForms = document.querySelectorAll('form[action="/cart/add"]');
+      if (targetForms.length > 0) {
+        targetForms.forEach(function (targetForm) {
+          var inputName = "properties[" + title + "]";
+          targetForm.querySelectorAll('input[name="' + inputName + '"]').forEach(function (input) {
+            input.parentNode.removeChild(input);
+          });
+          if (value !== "") {
+            var newInput = document.createElement("input");
+            newInput.type = "hidden";
+            newInput.name = inputName;
+            newInput.value = value;
+            targetForm.appendChild(newInput);
+          }
+        });
+      } else {
+        console.error("Forms with action '/cart/add' not found.");
+      }
+    }
+
+    function updateDropdownPrice(title, value, price) {
+      var priceTextId = "total-price";
+      var priceTextNode = document.getElementById(priceTextId);
+      if (!priceTextNode) {
+        priceTextNode = document.createElement("p");
+        priceTextNode.id = priceTextId;
+        priceTextNode.style.color = "red";
+        container.appendChild(priceTextNode);
+      }
+      var previousValue = previousDropdownValues[title] ? previousDropdownValues[title].value : null;
+      var previousPrice = previousDropdownValues[title] ? previousDropdownValues[title].price : 0;
+      totalPrice -= previousPrice;
+      totalPrice += price;
+      priceTextNode.textContent = "Cart Price will Increment By: $" + totalPrice;
+      previousDropdownValues[title] = { value: value, price: price };
+      updateInputFields();
+    }
+
+    function updateInputFieldsForDropdown(title, value) {
+      var targetForms = document.querySelectorAll('form[action="/cart/add"]');
+      if (targetForms.length > 0) {
+        targetForms.forEach(function (targetForm) {
+          var inputName = "properties[" + title + "]";
+          targetForm.querySelectorAll('input[name="' + inputName + '"]').forEach(function (input) {
+            input.parentNode.removeChild(input);
+          });
+          if (value !== "") {
+            var newInput = document.createElement("input");
+            newInput.type = "hidden";
+            newInput.name = inputName;
+            newInput.value = value;
+            targetForm.appendChild(newInput);
+          }
+        });
+      } else {
+        console.error("Forms with action '/cart/add' not found.");
+      }
+    }
+
+    function updateInputFields() {
+      var targetForms = document.querySelectorAll('form[action="/cart/add"]');
+      if (targetForms.length > 0) {
+        targetForms.forEach(function (targetForm) {
+          targetForm.querySelectorAll('input[name^="properties["]').forEach(function (input) {
+            input.parentNode.removeChild(input);
+          });
+          Object.keys(selectedValues).forEach(function (title) {
+            var value = selectedValues[title].join(",");
+            var newInput = document.createElement("input");
+            newInput.type = "hidden";
+            newInput.name = "properties[" + title + "]";
+            newInput.value = value;
+            targetForm.appendChild(newInput);
+          });
+          var totalPriceInput = document.createElement("input");
+          totalPriceInput.type = "hidden";
+          totalPriceInput.name = "properties[price]";
+          totalPriceInput.value = totalPrice;
+          targetForm.appendChild(totalPriceInput);
+        });
+      } else {
+        console.error("Forms with action '/cart/add' not found.");
+      }
+    }
+  });
+</script>
 {% schema %}
-  {
-    "name": "Kas-Variants",
-    "target": "section",
-    "stylesheet": "stylesheet.css",
-    "enabled_on": {
-      "templates": ["*"]
-    },
-    "settings": []
-  }
+{
+  "name": "Kas-Variants",
+  "target": "section",
+  "stylesheet": "stylesheet.css",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": []
+}
 {% endschema %}
